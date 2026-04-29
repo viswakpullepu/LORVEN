@@ -145,20 +145,20 @@ const sharedProjects: UpcomingProject[] = [
 const aiInsights: AIInsight[] = [
   {
     title: "Strategic Scaling Opportunity",
-    recommendation: "Operational efficiency in the APAC node is 22% higher than predicted. Redirecting excess throughput to European markets could capture $340k in quarterly revenue.",
-    impact: 'High',
+    recommendation: "Operational efficiency in the APAC node is 0% higher than predicted. Redirecting excess throughput to European markets could capture $0 in quarterly revenue.",
+    impact: 'Low',
     category: 'Revenue'
   },
   {
     title: "Risk Mitigation Protocol",
-    recommendation: "Predictive telemetry indicates a potential bottleneck in Phase Delta. Synchronizing Tier-3 assets 48 hours early is recommended to bypass saturation.",
-    impact: 'Medium',
+    recommendation: "Predictive telemetry indicates a potential bottleneck in Phase Delta. Synchronizing Tier-3 assets 0 hours early is recommended to bypass saturation.",
+    impact: 'Low',
     category: 'Operation'
   },
   {
     title: "Cognitive Performance Window",
-    recommendation: "Partner interaction patterns peak during pre-market hours. Scheduling strategic reviews at 07:00 UTC aligns with maximum engagement cycles.",
-    impact: 'High',
+    recommendation: "Partner interaction patterns peak during pre-market hours. Scheduling strategic reviews at 00:00 UTC aligns with maximum engagement cycles.",
+    impact: 'Low',
     category: 'Strategy'
   }
 ];
@@ -283,13 +283,12 @@ export default function ClientPortal() {
           >
             <div className="flex flex-col items-end gap-1">
               <span className="font-display text-[10px] uppercase tracking-[0.3em] text-zinc-500">Partnership Tenure</span>
-              <span className="text-4xl font-display font-black">1.2 <span className="text-amber-500 italic">YEARS</span></span>
+              <span className="text-4xl font-display font-black">0 <span className="text-amber-500 italic">YEARS</span></span>
             </div>
             <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <div key={s} className="w-1 h-3 bg-amber-500/20 rounded-full" />
+              {[1, 2, 3, 4, 5, 6].map((s) => (
+                <div key={s} className="w-1 h-3 bg-zinc-800 rounded-full" />
               ))}
-              <div className="w-1 h-3 bg-amber-500 rounded-full" />
             </div>
           </motion.div>
         </header>
@@ -312,36 +311,36 @@ export default function ClientPortal() {
                 {[
                   { 
                     label: 'Revenue Impact', 
-                    value: 2.4, 
+                    value: 0, 
                     prefix: '$', 
                     suffix: 'M', 
-                    growth: '+42% YoY', 
+                    growth: '0% Variance', 
                     icon: DollarSign, 
                     desc: 'Total capital appreciation generated through strategic optimizations.',
                     path: '/strategy'
                   },
                   { 
                     label: 'Time Autonomy', 
-                    value: 160, 
+                    value: 0, 
                     suffix: ' HRS/MO', 
-                    growth: 'Efficiency Peak', 
+                    growth: 'Baseline', 
                     icon: Clock, 
                     desc: 'Operational hours reclaimed via automation and process restructuring.',
                     path: '/telemetry'
                   },
                   { 
                     label: 'Perf. Index', 
-                    value: 88.4, 
+                    value: 0, 
                     suffix: '%', 
-                    growth: 'High Yield', 
+                    growth: 'Baseline', 
                     icon: Activity, 
                     desc: 'Aggregate performance growth across tracked operational KPIs.',
                     path: '/telemetry'
                   },
                   { 
                     label: 'Active Directives', 
-                    value: 12, 
-                    growth: '3 In-Queue', 
+                    value: 0, 
+                    growth: '0 In-Queue', 
                     icon: Briefcase, 
                     desc: 'Current high-priority projects under Lorven execution.',
                     path: '/growth'
@@ -663,7 +662,7 @@ export default function ClientPortal() {
                  </div>
                  <div>
                     <h3 className="font-display text-4xl md:text-5xl font-black text-black italic uppercase italic leading-[0.85] tracking-tighter">STRATEGIC<br /><span className="not-italic">DOMINANCE.</span></h3>
-                    <p className="text-black/60 text-[11px] mt-6 font-black uppercase tracking-[0.3em] leading-relaxed">Neural infrastructure synchronized across 24 global nodes. Execution potential: 100%.</p>
+                    <p className="text-black/60 text-[11px] mt-6 font-black uppercase tracking-[0.3em] leading-relaxed">Neural infrastructure synchronized across 0 global nodes. Execution potential: 0%.</p>
                  </div>
               </div>
 
@@ -715,7 +714,7 @@ export default function ClientPortal() {
                     <span className="font-display text-[10px] uppercase tracking-[0.5em] text-amber-500 font-black underline underline-offset-8 decoration-amber-500/30">Milestone_03_Unlocked</span>
                   </div>
                   <h3 className="font-display text-2xl md:text-3xl font-black italic tracking-tighter text-white uppercase leading-none mt-2">Efficiency Threshold Achieved.</h3>
-                  <p className="text-zinc-400 text-xs md:text-sm mt-3 font-medium leading-relaxed uppercase tracking-widest">Your operational node has officially crossed the 85% autonomy index. Revenue scaling pipeline is now active.</p>
+                  <p className="text-zinc-400 text-xs md:text-sm mt-3 font-medium leading-relaxed uppercase tracking-widest">Your operational node has officially crossed the 0% autonomy index. Revenue scaling pipeline is now active.</p>
                   
                   <div className="flex gap-4 mt-6">
                     <button 

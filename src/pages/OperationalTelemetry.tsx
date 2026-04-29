@@ -142,9 +142,9 @@ export default function OperationalTelemetry() {
 
                  <div className="space-y-6">
                     {[
-                      { label: "Core Load", progress: 64, icon: Activity },
-                      { label: "Neural Drift", progress: 12, icon: Zap },
-                      { label: "Data Flow", progress: 88, icon: Database },
+                      { label: "Core Load", progress: 0, icon: Activity },
+                      { label: "Neural Drift", progress: 0, icon: Zap },
+                      { label: "Data Flow", progress: 0, icon: Database },
                     ].map((stat, i) => (
                       <div key={i} className="flex flex-col gap-4">
                          <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-black text-zinc-400">
@@ -171,7 +171,7 @@ export default function OperationalTelemetry() {
                  <ShieldCheck className="w-12 h-12 text-black transition-transform group-hover:rotate-12 duration-700" />
                  <div>
                     <h3 className="font-display text-3xl font-black text-black italic uppercase leading-none tracking-tighter">Security<br />Enforced.</h3>
-                    <p className="text-black/60 text-[10px] mt-4 font-black uppercase tracking-[0.3em] leading-relaxed">Multi-layer encryption active. No intrusion detected in last 3,420 cycles.</p>
+                    <p className="text-black/60 text-[10px] mt-4 font-black uppercase tracking-[0.3em] leading-relaxed">Multi-layer encryption active. No intrusion detected in last 0 cycles.</p>
                  </div>
               </div>
            </div>
@@ -180,10 +180,10 @@ export default function OperationalTelemetry() {
         {/* Distributed Nodes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
            {[
-             { name: "Node_London", load: "High", ping: "8ms", icon: Globe },
-             { name: "Node_S_Francisco", load: "Normal", ping: "22ms", icon: Cloud },
-             { name: "Node_Singapore", load: "Optimizing", ping: "14ms", icon: Layers },
-             { name: "Node_Global_Relay", load: "Standby", ping: "4ms", icon: Zap }
+             { name: "Node_London", load: "Inactive", ping: "0ms", icon: Globe },
+             { name: "Node_S_Francisco", load: "Inactive", ping: "0ms", icon: Cloud },
+             { name: "Node_Singapore", load: "Inactive", ping: "0ms", icon: Layers },
+             { name: "Node_Global_Relay", load: "Inactive", ping: "0ms", icon: Zap }
            ].map((node, i) => (
              <motion.div 
                key={i}

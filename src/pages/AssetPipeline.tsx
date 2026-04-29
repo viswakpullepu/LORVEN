@@ -143,10 +143,10 @@ export default function AssetPipeline() {
         {/* Supporting Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
            {[
-             { label: "Directives", value: "12", icon: Briefcase },
-             { label: "Efficiency", value: "98%", icon: Zap },
-             { label: "Templates", value: "420+", icon: Layout },
-             { label: "Yield_Scale", value: "6.2x", icon: TrendingUp }
+             { label: "Directives", value: "0", icon: Briefcase },
+             { label: "Efficiency", value: "0%", icon: Zap },
+             { label: "Templates", value: "0", icon: Layout },
+             { label: "Yield_Scale", value: "0x", icon: TrendingUp }
            ].map((stat, i) => (
              <div key={i} className="bg-zinc-900/40 border border-white/5 p-8 rounded-[2.5rem] flex items-center gap-6 group hover:bg-zinc-900/60 transition-colors">
                 <div className="w-12 h-12 bg-black border border-white/10 rounded-xl flex items-center justify-center text-amber-500 group-hover:rotate-6 transition-transform">

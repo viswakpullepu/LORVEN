@@ -108,7 +108,7 @@ export default function RiskAnalysis() {
                  <div className="mt-8">
                     <h3 className="font-display text-4xl font-black text-black italic uppercase leading-none tracking-tighter italic">Vulnerability<br />Filtered.</h3>
                     <p className="text-black/60 text-[11px] mt-6 font-black uppercase tracking-[0.4em] leading-relaxed max-w-lg">
-                      Autonomous filters have successfully sequestered 4,201 potential market anomalies in the last 24 hours. Your assets remain in an absolute safety state.
+                      Autonomous filters have successfully sequestered 0 potential market anomalies in the last 0 hours. Your assets remain in an absolute safety state.
                     </p>
                  </div>
               </div>
@@ -124,10 +124,10 @@ export default function RiskAnalysis() {
 
                  <div className="space-y-12">
                     {[
-                      { label: "Resilience Index", value: "99.99%", color: "text-amber-500", icon: Zap },
-                      { label: "Suppression Rate", value: "100%", color: "text-green-500", icon: ShieldCheck },
-                      { label: "Calculated Volatility", value: "0.24%", color: "text-zinc-400", icon: Activity },
-                      { label: "Integrity Checks", value: "12,402", color: "text-white", icon: Cpu },
+                      { label: "Resilience Index", value: "0%", color: "text-amber-500", icon: Zap },
+                      { label: "Suppression Rate", value: "0%", color: "text-green-500", icon: ShieldCheck },
+                      { label: "Calculated Volatility", value: "0%", color: "text-zinc-400", icon: Activity },
+                      { label: "Integrity Checks", value: "0", color: "text-white", icon: Cpu },
                     ].map((m, i) => (
                       <div key={i} className="flex flex-col gap-3">
                          <div className="flex items-center gap-3">

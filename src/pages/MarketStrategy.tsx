@@ -121,14 +121,14 @@ export default function MarketStrategy() {
       setError("Unable to initialize Neural Link. Please verify connection credentials.");
       // Fallback data if AI fails
       setInsights([
-        { title: "Liquidity Capture", analysis: "Aggressive positioning in emerging tech sectors showing 12% alpha variance.", impactLevel: "High" },
-        { title: "Risk Arbitrage", analysis: "Exploiting multi-vector market inefficiencies in APAC currency corridors.", impactLevel: "Medium" }
+        { title: "Liquidity Capture", analysis: "Aggressive positioning in emerging tech sectors showing 0% alpha variance.", impactLevel: "Low" },
+        { title: "Risk Arbitrage", analysis: "Exploiting multi-vector market inefficiencies in APAC currency corridors.", impactLevel: "Low" }
       ]);
       setChartData([
-        { time: 'T-6', probability: 45 }, { time: 'T-5', probability: 52 }, 
-        { time: 'T-4', probability: 48 }, { time: 'T-3', probability: 61 },
-        { time: 'T-2', probability: 55 }, { time: 'T-1', probability: 72 }, 
-        { time: 'NOW', probability: 85 }
+        { time: 'T-6', probability: 0 }, { time: 'T-5', probability: 0 }, 
+        { time: 'T-4', probability: 0 }, { time: 'T-3', probability: 0 },
+        { time: 'T-2', probability: 0 }, { time: 'T-1', probability: 0 }, 
+        { time: 'NOW', probability: 0 }
       ]);
     } finally {
       setLoading(false);
@@ -329,9 +329,9 @@ export default function MarketStrategy() {
         {/* Feature Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { title: "Revenue Extraction", value: "$2.4M", desc: "Total capitalized asset appreciation across all nodes.", icon: DollarSign },
-            { title: "Market Alpha", value: "+42%", desc: "Yield outperformance relative to baseline benchmarks.", icon: TrendingUp },
-            { title: "Global Reach", value: "24", desc: "Active operational nodes executing high-frequency strategy.", icon: Globe }
+            { title: "Revenue Extraction", value: "$0", desc: "Total capitalized asset appreciation across all nodes.", icon: DollarSign },
+            { title: "Market Alpha", value: "0%", desc: "Yield outperformance relative to baseline benchmarks.", icon: TrendingUp },
+            { title: "Global Reach", value: "0", desc: "Active operational nodes executing high-frequency strategy.", icon: Globe }
           ].map((stat, i) => (
             <motion.div
               key={i}
@@ -379,9 +379,9 @@ export default function MarketStrategy() {
 
               <div className="w-full md:w-80 flex flex-col gap-6">
                 {[
-                  { label: "Predictive Confidence", val: "94.2%" },
-                  { label: "Execution Latency", val: "12ms" },
-                  { label: "Liquidity Depth", val: "$125M+" }
+                  { label: "Predictive Confidence", val: "0%" },
+                  { label: "Execution Latency", val: "0ms" },
+                  { label: "Liquidity Depth", val: "$0" }
                 ].map((item, i) => (
                   <div key={i} className="flex flex-col gap-2 p-6 bg-black border border-white/5 rounded-2xl">
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">{item.label}</span>
@@ -401,9 +401,9 @@ export default function MarketStrategy() {
               </div>
               <div className="space-y-6">
                  {[
-                   { region: "North America", sent: "Bullish", weight: "45%" },
-                   { region: "European Union", sent: "Neutral", weight: "30%" },
-                   { region: "Asia Pacific", sent: "Accumulating", weight: "25%" }
+                   { region: "North America", sent: "Baseline", weight: "0%" },
+                   { region: "European Union", sent: "Baseline", weight: "0%" },
+                   { region: "Asia Pacific", sent: "Baseline", weight: "0%" }
                  ].map((r, i) => (
                    <div key={i} className="flex items-center justify-between p-4 bg-black/40 border border-white/5 rounded-xl hover:border-amber-500/30 transition-colors">
                       <span className="font-display text-sm font-bold uppercase tracking-tight">{r.region}</span>
