@@ -52,17 +52,44 @@ export interface Profile {
 
 let supabaseInstance: SupabaseClient | null = null;
 
+// Safe environment variable logging and validation
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+console.log('Supabase Configuration Check:', {
+  url: supabaseUrl ? 'Configured' : 'Missing',
+  key: supabaseAnonKey ? 'Configured' : 'Missing'
+});
+
+if (import.meta.env.DEV) {
+  console.log('VITE_SUPABASE_URL:', supabaseUrl);
+  console.log('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey);
+}
+
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+
 export function getSupabase(): SupabaseClient {
   if (supabaseInstance) return supabaseInstance;
 
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Supabase credentials are missing. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the Settings menu.');
+  if (!isSupabaseConfigured) {
+    const errorMsg = 'Supabase credentials are missing. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the Settings menu.';
+    console.error(errorMsg);
+    
+    if (import.meta.env.DEV) {
+      throw new Error(errorMsg);
+    }
+    
+    // In production, we return a dummy client or handle via isSupabaseConfigured check in UI
+    // To prevent total crash, we'll return a proxy that logs errors on every call if someone ignores isSupabaseConfigured
+    return new Proxy({} as SupabaseClient, {
+      get: () => {
+        console.error('Attempted to use Supabase without configuration.');
+        return () => Promise.reject(new Error('Supabase not configured'));
+      }
+    });
   }
 
-  supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
+  supabaseInstance = createClient(supabaseUrl!, supabaseAnonKey!);
   return supabaseInstance;
 }
 

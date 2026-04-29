@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
-import { getSupabase } from '../lib/supabase';
+import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
 
 export type UserRole = 'admin' | 'client';
 
@@ -24,6 +24,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full space-y-8 p-12 bg-white/5 border border-white/10 rounded-lg backdrop-blur-xl">
+          <div className="space-y-4">
+            <h1 className="font-display text-2xl text-white tracking-tight">Configuration Required</h1>
+            <p className="text-zinc-400 text-sm leading-relaxed">
+              Connectivity credentials for the neural uplink are missing. 
+              Please verify <code className="bg-white/5 px-2 py-1 rounded text-amber-500">VITE_SUPABASE_URL</code> and <code className="bg-white/5 px-2 py-1 rounded text-amber-500">VITE_SUPABASE_ANON_KEY</code> in your environment parameters.
+            </p>
+          </div>
+          <div className="pt-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded text-amber-500 text-[10px] uppercase tracking-widest font-black">
+              System Inactive
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const fetchProfile = async (userId: string) => {
     try {
