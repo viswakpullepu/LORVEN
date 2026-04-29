@@ -28,6 +28,7 @@ import Logo from '../components/Logo';
 import { getSupabase } from '../lib/supabase';
 
 export default function Register() {
+  const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,9 +70,9 @@ export default function Register() {
 
       if (authData.user) {
         // 2. Insert into profiles (the trigger should handle this, but we'll do it as fallback)
-        const { error: profileError } = await getSupabase()
+        await getSupabase()
           .from('profiles')
-          .insert([
+          .upsert([
             { 
               id: authData.user.id, 
               email: authData.user.email,
@@ -85,9 +86,11 @@ export default function Register() {
           .insert([
             { ...formData, created_at: new Date().toISOString() }
           ]);
+          
+        // Auto-login or redirect to login
+        navigate('/login', { state: { registered: true } });
       }
-      
-      setSubmitted(true);
+
     } catch (err: any) {
       console.error('Supabase Error:', err);
       setError(err.message || 'An error occurred during indexing. Please verify credentials.');

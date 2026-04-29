@@ -9,7 +9,7 @@ import {
   ShieldCheck,
   LogIn
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { IMAGES } from '../constants';
 import { signInWithGoogle, signInWithMembership } from '../lib/supabase';
 import { useAuth } from '../components/AuthContext';
@@ -22,6 +22,8 @@ export default function Login() {
   const [mode, setMode] = useState<LoginMode>('client');
   const [credentials, setCredentials] = useState({ membership: '', password: '' });
   const navigate = useNavigate();
+  const location = useLocation();
+  const [successMsg, setSuccessMsg] = useState(location.state?.registered ? 'Account initialized successfully. Engage your portal below.' : '');
 
   const { profile, loading: authLoading } = (window as any)._authContext || {}; // We'll use useAuth inside the component
 
@@ -115,6 +117,16 @@ export default function Login() {
           </div>
 
           <AnimatePresence mode="wait">
+            {successMsg && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="bg-green-500/10 border border-green-500/20 text-green-500 text-[10px] p-4 rounded-xl text-center tracking-widest font-black uppercase"
+              >
+                {successMsg}
+              </motion.div>
+            )}
+
             {mode === 'client' ? (
               <motion.div 
                 key="client"
@@ -217,10 +229,14 @@ export default function Login() {
             )}
           </AnimatePresence>
 
-          <div className="text-center mt-2 border-t border-white/5 pt-4">
-            <p className="font-body-md text-on-surface-variant text-[10px] uppercase tracking-widest opacity-40">
+          <div className="text-center mt-2 border-t border-white/5 pt-4 flex flex-col gap-3">
+            <p className="font-body-md text-on-surface-variant text-[9px] uppercase tracking-widest opacity-40">
               Authorized access only • v4.2
             </p>
+            <div className="flex justify-center gap-6">
+              <Link to="/register" className="text-[9px] uppercase tracking-[0.3em] text-amber-500 hover:text-white transition-colors font-black">Register_Account</Link>
+              <a href="mailto:support@lorven.institutional" className="text-[9px] uppercase tracking-[0.3em] text-zinc-600 hover:text-white transition-colors font-black">Contact_Support</a>
+            </div>
           </div>
         </motion.div>
       </main>
