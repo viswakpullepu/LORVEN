@@ -25,9 +25,33 @@ import {
   Tooltip, 
   CartesianGrid 
 } from 'recharts';
-import { GoogleGenAI, Type } from "@google/genai";
+// Replaced with dynamic import in getAI to prevent top-level crashes
+// import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Lazy initialization to avoid crash if API key is missing
+let aiInstance: any = null;
+let genaiModule: any = null;
+
+const getAI = async () => {
+  if (aiInstance) return aiInstance;
+  
+  try {
+    if (!genaiModule) {
+      genaiModule = await import("@google/genai");
+    }
+    
+    const apiKey = typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined;
+    if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey === "") {
+      throw new Error("GEMINI_API_KEY is not configured.");
+    }
+    aiInstance = new genaiModule.GoogleGenAI({ apiKey });
+    return aiInstance;
+  } catch (err) {
+    console.error("AI Initialization Error:", err);
+    throw err;
+  }
+};
+
 
 interface AIInsight {
   title: string;
@@ -51,33 +75,34 @@ export default function MarketStrategy() {
     setLoading(true);
     setError(null);
     try {
+      const ai = await getAI();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: "Analyze current global market trends (simulated for current timeframe) and provide 3 actionable high-alpha strategy insights for a private equity firm named LORVEN. Also generate 7 data points for a 'Strategic Alpha Probability' trend graph (time vs percentage).",
         config: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: Type.OBJECT,
+            type: genaiModule.Type.OBJECT,
             properties: {
               insights: {
-                type: Type.ARRAY,
+                type: genaiModule.Type.ARRAY,
                 items: {
-                  type: Type.OBJECT,
+                  type: genaiModule.Type.OBJECT,
                   properties: {
-                    title: { type: Type.STRING },
-                    analysis: { type: Type.STRING },
-                    impactLevel: { type: Type.STRING, enum: ['High', 'Medium', 'Low'] }
+                    title: { type: genaiModule.Type.STRING },
+                    analysis: { type: genaiModule.Type.STRING },
+                    impactLevel: { type: genaiModule.Type.STRING, enum: ['High', 'Medium', 'Low'] }
                   },
                   required: ['title', 'analysis', 'impactLevel']
                 }
               },
               trendData: {
-                type: Type.ARRAY,
+                type: genaiModule.Type.ARRAY,
                 items: {
-                  type: Type.OBJECT,
+                  type: genaiModule.Type.OBJECT,
                   properties: {
-                    time: { type: Type.STRING },
-                    probability: { type: Type.NUMBER }
+                    time: { type: genaiModule.Type.STRING },
+                    probability: { type: genaiModule.Type.NUMBER }
                   },
                   required: ['time', 'probability']
                 }
