@@ -23,7 +23,7 @@ import React, { useState } from 'react';
 */
 import { motion } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Building, Globe, ArrowRight, CheckCircle2, Phone } from 'lucide-react';
+import { User, Mail, Building, Globe, ArrowRight, CheckCircle2, Phone, Key } from 'lucide-react';
 import Logo from '../components/Logo';
 import { getSupabase } from '../lib/supabase';
 
@@ -45,21 +45,52 @@ export default function Register() {
     setError(null);
     
     try {
-      const { error: supabaseError } = await getSupabase()
-        .from('consultation_requests')
-        .insert([
-          { 
-            ...formData,
-            created_at: new Date().toISOString() 
+      // 1. Sign up the user in Supabase Auth
+      // Note: In a real app, you'd collect a password too.
+      // For this implementation, we'll assume the user uses Google Login or we add a password field.
+      // Since it's a request for "Signup", I'll add a password field to the form or use a default one for demo.
+      // To keep it robust, I'll add a password field to the UI first.
+      
+      const password = (e.target as any).password.value;
+      
+      const { data: authData, error: authError } = await getSupabase().auth.signUp({
+        email: formData.email,
+        password: password,
+        options: {
+          data: {
+            full_name: formData.name,
+            company: formData.company,
+            region: formData.region,
           }
-        ]);
+        }
+      });
 
-      if (supabaseError) throw supabaseError;
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // 2. Insert into profiles (the trigger should handle this, but we'll do it as fallback)
+        const { error: profileError } = await getSupabase()
+          .from('profiles')
+          .insert([
+            { 
+              id: authData.user.id, 
+              email: authData.user.email,
+              role: 'client' 
+            }
+          ]);
+        
+        // We also still insert into consultation_requests for lead tracking
+        await getSupabase()
+          .from('consultation_requests')
+          .insert([
+            { ...formData, created_at: new Date().toISOString() }
+          ]);
+      }
       
       setSubmitted(true);
     } catch (err: any) {
       console.error('Supabase Error:', err);
-      setError(err.message || 'An error occurred during registration. Please check your configuration.');
+      setError(err.message || 'An error occurred during indexing. Please verify credentials.');
     } finally {
       setLoading(false);
     }
@@ -207,6 +238,20 @@ export default function Register() {
                     placeholder="+91 00000 00000"
                     value={formData.mobile}
                     onChange={e => setFormData({...formData, mobile: e.target.value})}
+                    className="w-full bg-zinc-900 border border-white/5 rounded-sm px-12 py-4 md:py-5 text-white placeholder:text-zinc-800 focus:border-amber-500/30 focus:outline-none transition-all font-display text-sm tracking-tight"
+                  />
+                </div>
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }} className="flex flex-col gap-2.5">
+                <label className="font-display text-zinc-600 text-[9px] tracking-[0.4em] uppercase ml-1">Terminal Password</label>
+                <div className="relative group/input">
+                  <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-700 group-focus-within/input:text-amber-500 transition-colors w-4 h-4" />
+                  <input 
+                    type="password" 
+                    name="password"
+                    required
+                    placeholder="••••••••••••"
                     className="w-full bg-zinc-900 border border-white/5 rounded-sm px-12 py-4 md:py-5 text-white placeholder:text-zinc-800 focus:border-amber-500/30 focus:outline-none transition-all font-display text-sm tracking-tight"
                   />
                 </div>

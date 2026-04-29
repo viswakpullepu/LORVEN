@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getSupabase } from '../lib/supabase';
+import { useAuth } from '../components/AuthContext';
 
 // Helper component for animated numbers
 const Counter = ({ value, duration = 1.5, prefix = "", suffix = "" }: { value: number, duration?: number, prefix?: string, suffix?: string }) => {
@@ -170,7 +171,7 @@ const liveActivities: LiveActivity[] = [
 ];
 
 export default function ClientPortal() {
-  const [user, setUser] = useState<any>(null);
+  const { user, profile, signOut: authSignOut } = useAuth();
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
   const navigate = useNavigate();
@@ -181,16 +182,8 @@ export default function ClientPortal() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await getSupabase().auth.getUser();
-      setUser(user);
-    };
-    fetchUser();
-  }, []);
-
   const handleLogout = async () => {
-    await getSupabase().auth.signOut();
+    await authSignOut();
     navigate('/');
   };
 
@@ -227,12 +220,14 @@ export default function ClientPortal() {
               >
                 Overview
               </button>
-              <button 
-                onClick={() => navigate('/dashboard')}
-                className="font-display text-[10px] uppercase tracking-[0.3em] text-zinc-500 hover:text-white transition-colors font-black"
-              >
-                Executive Terminal
-              </button>
+              {profile?.role === 'admin' && (
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="font-display text-[10px] uppercase tracking-[0.3em] text-zinc-500 hover:text-white transition-colors font-black"
+                >
+                  Executive Terminal
+                </button>
+              )}
             </div>
 
             <div className="flex items-center gap-6">

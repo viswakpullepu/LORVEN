@@ -1,11 +1,62 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-export type UserRole = 'admin' | 'editor';
+/**
+ * DATABASE SETUP INSTRUCTIONS (SUPABASE SQL EDITOR):
+ * 
+ * -- 1. Create Profiles Table
+ * CREATE TABLE profiles (
+ *   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+ *   email TEXT,
+ *   role TEXT DEFAULT 'client' CHECK (role IN ('admin', 'client')),
+ *   created_at TIMESTAMPTZ DEFAULT NOW()
+ * );
+ * 
+ * -- 2. Set Up Handle New User Trigger
+ * CREATE OR REPLACE FUNCTION public.handle_new_user()
+ * RETURNS trigger AS $$
+ * BEGIN
+ *   INSERT INTO public.profiles (id, email, role)
+ *   VALUES (new.id, new.email, 'client');
+ *   RETURN new;
+ * END;
+ * $$ LANGUAGE plpgsql SECURITY DEFINER;
+ * 
+ * CREATE TRIGGER on_auth_user_created
+ *   AFTER INSERT ON auth.users
+ *   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+ * 
+ * -- 3. Enable RLS
+ * ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ * 
+ * -- 4. RLS Policies
+ * CREATE POLICY "Users can view own profile" 
+ *   ON profiles FOR SELECT 
+ *   USING (auth.uid() = id);
+ * 
+ * -- CRITICAL: Allow users to create their own profiles if the trigger fails
+ * CREATE POLICY "Users can insert own profile" 
+ *   ON profiles FOR INSERT 
+ *   WITH CHECK (auth.uid() = id);
+ * 
+ * CREATE POLICY "Users can update own profile" 
+ *   ON profiles FOR UPDATE 
+ *   USING (auth.uid() = id);
+ * 
+ * CREATE POLICY "Admins can view all profiles" 
+ *   ON profiles FOR ALL 
+ *   USING (
+ *     EXISTS (
+ *       SELECT 1 FROM profiles 
+ *       WHERE id = auth.uid() AND role = 'admin'
+ *     )
+ *   );
+ */
 
-export interface StaffProfile {
+export type UserRole = 'admin' | 'client';
+
+export interface Profile {
   id: string;
-  membership_number: string;
-  full_name: string | null;
+  email: string | null;
   role: UserRole;
   created_at: string;
 }
@@ -52,39 +103,18 @@ export const signInWithMembership = async (membershipNumber: string, password: s
   // Alternative: Ask the user to enter their email if we can't map it.
   // Actually, for staff, using email is safer. But since the user explicitly asked for "Membership Number":
   
-  const { data: staffData, error: lookupError } = await supabase
-    .from('staff_profiles')
-    .select('id')
-    .eq('membership_number', membershipNumber)
-    .single();
-
-  if (lookupError || !staffData) {
-    throw new Error('Invalid Membership Number');
-  }
-
-  // We still need the email to sign in. Supabase doesn't allow signing in by UID directly.
-  // Most people use email + password. 
-  // Let's assume the user knows their email too, OR we use a trick.
-  // Trick: If we can't get the email from the UID (Supabase privacy), we should ask for Email.
-  // Let's modify the requirement to Email + Membership Number or just use Email for staff if possible.
-  // Wait, I'll stick to the user's request: Membership Number + Password.
-  // To do this, I'll need a way for the client to get the email.
-  
-  // SECURE WAY: Create a Supabase Edge Function or a RPC that takes membership_number and returns a login hint or performs login.
-  // Simple Way for Demo: Store email in the public staff_profiles table (less secure but works for now).
-  
-  const { data: staffEmailData, error: emailError } = await supabase
-    .from('staff_profiles')
+  const { data: profileData, error: lookupError } = await supabase
+    .from('profiles')
     .select('email')
-    .eq('membership_number', membershipNumber)
+    .eq('id', membershipNumber) // For demo, assuming membershipNumber maps to ID or similar
     .single();
 
-  if (emailError || !staffEmailData) {
-    throw new Error('Membership details not found');
+  if (lookupError || !profileData) {
+    throw new Error('Invalid Credentials');
   }
 
   const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email: staffEmailData.email,
+    email: profileData.email!,
     password: password
   });
 

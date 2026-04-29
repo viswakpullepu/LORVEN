@@ -1,31 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { getSupabase } from '../lib/supabase';
-import { User } from '@supabase/supabase-js';
+import { useAuth, UserRole } from './AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  allowedRole?: UserRole;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await getSupabase().auth.getUser();
-      setUser(user);
-      setLoading(false);
-    };
-
-    checkUser();
-
-    const { data: { subscription } } = getSupabase().auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRole = 'client' }) => {
+  const { user, profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -40,6 +23,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // If a role is required and user's role doesn't match
+  // Admins can access everything, but clients can only access 'client' allowed routes
+  if (allowedRole === 'admin' && profile?.role !== 'admin') {
+    return <Navigate to="/portal" replace />;
   }
 
   return <>{children}</>;

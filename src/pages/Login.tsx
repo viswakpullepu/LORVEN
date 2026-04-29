@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { IMAGES } from '../constants';
 import { signInWithGoogle, signInWithMembership } from '../lib/supabase';
+import { useAuth } from '../components/AuthContext';
 
 type LoginMode = 'client' | 'staff';
 
@@ -22,15 +23,21 @@ export default function Login() {
   const [credentials, setCredentials] = useState({ membership: '', password: '' });
   const navigate = useNavigate();
 
+  const { profile, loading: authLoading } = (window as any)._authContext || {}; // We'll use useAuth inside the component
+
+  const { user, profile: authProfile, loading: authContextLoading } = useAuth();
+
   React.useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await (await import('../lib/supabase')).getSupabase().auth.getUser();
-      if (user) {
+    if (!authContextLoading && user) {
+      // If profile is still null but user is authenticated, we assume client role for now
+      // This prevents getting stuck on the login page
+      if (authProfile?.role === 'admin') {
+        navigate('/dashboard');
+      } else {
         navigate('/portal');
       }
-    };
-    checkUser();
-  }, [navigate]);
+    }
+  }, [user, authProfile, authContextLoading, navigate]);
 
   const handleStaffLogin = async (e: React.FormEvent) => {
     e.preventDefault();

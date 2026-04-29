@@ -32,9 +32,9 @@ import {
 } from 'lucide-react';
 import { IMAGES } from '../constants';
 import { cn } from '../lib/utils';
-import { getSupabase, signOut, updatePassword } from '../lib/supabase';
+import { useAuth } from '../components/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User } from '@supabase/supabase-js';
+import { updatePassword } from '../lib/supabase';
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -85,8 +85,7 @@ function DigitalClock() {
 }
 
 export default function Dashboard() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, profile, loading, signOut: authSignOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Dashboard');
   
@@ -103,20 +102,6 @@ export default function Dashboard() {
   const [newPassword, setNewPassword] = useState('');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordStatus, setPasswordStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const supabase = getSupabase();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/login');
-      } else {
-        setUser(user);
-      }
-      setLoading(false);
-    };
-    checkUser();
-  }, [navigate]);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,7 +126,7 @@ export default function Dashboard() {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      await authSignOut();
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);

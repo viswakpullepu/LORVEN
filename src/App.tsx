@@ -11,6 +11,7 @@ import OperationalTelemetry from './pages/OperationalTelemetry';
 import AssetPipeline from './pages/AssetPipeline';
 import RiskAnalysis from './pages/RiskAnalysis';
 import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './components/AuthContext';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -37,7 +38,7 @@ function AnimatedRoutes() {
           <Route 
             path="/dashboard" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRole="admin">
                 <PageTransition>
                   <Dashboard />
                 </PageTransition>
@@ -116,8 +117,10 @@ function PageTransition({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AnimatedRoutes />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <AnimatedRoutes />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
