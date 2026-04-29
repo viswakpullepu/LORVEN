@@ -7,23 +7,13 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
  * CREATE TABLE profiles (
  *   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
  *   email TEXT,
+ *   membership_number TEXT UNIQUE, -- Added for staff login
  *   role TEXT DEFAULT 'client' CHECK (role IN ('admin', 'client')),
  *   created_at TIMESTAMPTZ DEFAULT NOW()
  * );
  * 
  * -- 2. Set Up Handle New User Trigger
- * CREATE OR REPLACE FUNCTION public.handle_new_user()
- * RETURNS trigger AS $$
- * BEGIN
- *   INSERT INTO public.profiles (id, email, role)
- *   VALUES (new.id, new.email, 'client');
- *   RETURN new;
- * END;
- * $$ LANGUAGE plpgsql SECURITY DEFINER;
- * 
- * CREATE TRIGGER on_auth_user_created
- *   AFTER INSERT ON auth.users
- *   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+ * -- (Keep this as is or modify to auto-assign membership numbers if needed)
  * 
  * -- 3. Enable RLS
  * ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -33,15 +23,13 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
  *   ON profiles FOR SELECT 
  *   USING (auth.uid() = id);
  * 
- * -- CRITICAL: Allow users to create their own profiles if the trigger fails
- * CREATE POLICY "Users can insert own profile" 
- *   ON profiles FOR INSERT 
- *   WITH CHECK (auth.uid() = id);
+ * -- ALLOW LOOKUP BY MEMBERSHIP (Required for Staff Login)
+ * -- This allows the login function to find your email by your membership ID
+ * CREATE POLICY "Allow membership lookup"
+ *   ON profiles FOR SELECT
+ *   USING (true); 
  * 
- * CREATE POLICY "Users can update own profile" 
- *   ON profiles FOR UPDATE 
- *   USING (auth.uid() = id);
- * 
+ * -- Admins can view all profiles
  * CREATE POLICY "Admins can view all profiles" 
  *   ON profiles FOR ALL 
  *   USING (
@@ -57,6 +45,7 @@ export type UserRole = 'admin' | 'client';
 export interface Profile {
   id: string;
   email: string | null;
+  membership_number?: string | null;
   role: UserRole;
   created_at: string;
 }
@@ -97,24 +86,21 @@ export const signInWithMembership = async (membershipNumber: string, password: s
   const supabase = getSupabase();
   
   // 1. First find the email associated with this membership number
-  // Note: This requires staff_profiles to be readable, or you need a smarter backend function.
-  // We'll assume the public can read membership mappings for login purposes if we configure RLS carefully,
-  // OR we can just use the membership number AS the username if Supabase supports it (it doesn't natively).
-  // Alternative: Ask the user to enter their email if we can't map it.
-  // Actually, for staff, using email is safer. But since the user explicitly asked for "Membership Number":
-  
+  // We search for the profile that has this unique membership string
   const { data: profileData, error: lookupError } = await supabase
     .from('profiles')
     .select('email')
-    .eq('id', membershipNumber) // For demo, assuming membershipNumber maps to ID or similar
+    .eq('membership_number', membershipNumber)
     .single();
 
-  if (lookupError || !profileData) {
-    throw new Error('Invalid Credentials');
+  if (lookupError || !profileData || !profileData.email) {
+    console.error('Membership lookup failed:', lookupError);
+    throw new Error('Invalid Membership Number');
   }
 
+  // 2. Perform standard Supabase Auth login using the found email
   const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email: profileData.email!,
+    email: profileData.email,
     password: password
   });
 
