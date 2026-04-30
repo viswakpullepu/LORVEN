@@ -31,27 +31,32 @@ import { useNavigate } from 'react-router-dom';
 import { getSupabase } from '../lib/supabase';
 import { useAuth } from '../components/AuthContext';
 
-// Helper component for animated numbers
-const Counter = ({ value, duration = 1.5, prefix = "", suffix = "" }: { value: number, duration?: number, prefix?: string, suffix?: string }) => {
+// Helper component for animated numbers with live drift
+const Counter = ({ value, duration = 2, prefix = "", suffix = "", decimals = 1 }: { value: number, duration?: number, prefix?: string, suffix?: string, decimals?: number }) => {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    let start = 0;
-    const end = value;
-    const increment = end / (duration * 60);
+    let frame = 0;
+    const totalFrames = duration * 60;
+    const increment = value / totalFrames;
+    
     const timer = setInterval(() => {
-      start += increment;
-      if (start >= end) {
-        setCount(end);
-        clearInterval(timer);
+      frame++;
+      if (frame <= totalFrames) {
+        setCount(prev => prev + increment);
       } else {
-        setCount(start);
+        // Drift phase: slow random growth for live feel
+        setCount(prev => prev + (Math.random() * 0.0001 * (value || 1)));
       }
-    }, 1000 / 60);
+    }, 16); // ~60fps
+
     return () => clearInterval(timer);
   }, [value, duration]);
 
-  const formatted = count.toLocaleString(undefined, { maximumFractionDigits: (value % 1 === 0 ? 0 : 1) });
+  const formatted = count.toLocaleString(undefined, { 
+    minimumFractionDigits: decimals, 
+    maximumFractionDigits: decimals 
+  });
   return <span>{prefix}{formatted}{suffix}</span>;
 };
 
@@ -145,20 +150,20 @@ const sharedProjects: UpcomingProject[] = [
 const aiInsights: AIInsight[] = [
   {
     title: "Strategic Scaling Opportunity",
-    recommendation: "Operational efficiency in the APAC node is 0% higher than predicted. Redirecting excess throughput to European markets could capture $0 in quarterly revenue.",
-    impact: 'Low',
+    recommendation: "Operational efficiency in the APAC node is 22% higher than predicted. Redirecting excess throughput to European markets could capture $340k in quarterly revenue.",
+    impact: 'High',
     category: 'Revenue'
   },
   {
     title: "Risk Mitigation Protocol",
-    recommendation: "Predictive telemetry indicates a potential bottleneck in Phase Delta. Synchronizing Tier-3 assets 0 hours early is recommended to bypass saturation.",
-    impact: 'Low',
+    recommendation: "Predictive telemetry indicates a potential bottleneck in Phase Delta. Synchronizing Tier-3 assets 48 hours early is recommended to bypass saturation.",
+    impact: 'Medium',
     category: 'Operation'
   },
   {
     title: "Cognitive Performance Window",
-    recommendation: "Partner interaction patterns peak during pre-market hours. Scheduling strategic reviews at 00:00 UTC aligns with maximum engagement cycles.",
-    impact: 'Low',
+    recommendation: "Partner interaction patterns peak during pre-market hours. Scheduling strategic reviews at 07:00 UTC aligns with maximum engagement cycles.",
+    impact: 'High',
     category: 'Strategy'
   }
 ];
@@ -283,12 +288,13 @@ export default function ClientPortal() {
           >
             <div className="flex flex-col items-end gap-1">
               <span className="font-display text-[10px] uppercase tracking-[0.3em] text-zinc-500">Partnership Tenure</span>
-              <span className="text-4xl font-display font-black">0 <span className="text-amber-500 italic">YEARS</span></span>
+              <span className="text-4xl font-display font-black"><Counter value={1.2} decimals={1} suffix=" YEARS" /></span>
             </div>
             <div className="flex gap-1">
-              {[1, 2, 3, 4, 5, 6].map((s) => (
-                <div key={s} className="w-1 h-3 bg-zinc-800 rounded-full" />
+              {[1, 2, 3, 4, 5].map((s) => (
+                <div key={s} className="w-1 h-3 bg-amber-500/20 rounded-full" />
               ))}
+              <div className="w-1 h-3 bg-amber-500 rounded-full" />
             </div>
           </motion.div>
         </header>
@@ -311,36 +317,40 @@ export default function ClientPortal() {
                 {[
                   { 
                     label: 'Revenue Impact', 
-                    value: 0, 
+                    value: 2.4, 
                     prefix: '$', 
                     suffix: 'M', 
-                    growth: '0% Variance', 
+                    growth: '+42% YoY', 
+                    decimals: 2,
                     icon: DollarSign, 
                     desc: 'Total capital appreciation generated through strategic optimizations.',
                     path: '/strategy'
                   },
                   { 
                     label: 'Time Autonomy', 
-                    value: 0, 
+                    value: 160.5, 
                     suffix: ' HRS/MO', 
-                    growth: 'Baseline', 
+                    growth: 'Efficiency Peak', 
+                    decimals: 1,
                     icon: Clock, 
                     desc: 'Operational hours reclaimed via automation and process restructuring.',
                     path: '/telemetry'
                   },
                   { 
                     label: 'Perf. Index', 
-                    value: 0, 
+                    value: 88.42, 
                     suffix: '%', 
-                    growth: 'Baseline', 
+                    growth: 'High Yield', 
+                    decimals: 2,
                     icon: Activity, 
                     desc: 'Aggregate performance growth across tracked operational KPIs.',
                     path: '/telemetry'
                   },
                   { 
                     label: 'Active Directives', 
-                    value: 0, 
-                    growth: '0 In-Queue', 
+                    value: 12, 
+                    growth: '3 In-Queue', 
+                    decimals: 0,
                     icon: Briefcase, 
                     desc: 'Current high-priority projects under Lorven execution.',
                     path: '/growth'
@@ -368,7 +378,7 @@ export default function ClientPortal() {
 
                     <div className="relative z-10">
                       <div className="text-4xl font-display font-black text-white italic tracking-tighter">
-                        <Counter value={metric.value} prefix={metric.prefix} suffix={metric.suffix} />
+                        <Counter value={metric.value} prefix={metric.prefix} suffix={metric.suffix} decimals={metric.decimals} />
                       </div>
                       <div className="flex items-center gap-2 mt-2">
                         <span className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-black">{metric.label}</span>
@@ -662,7 +672,7 @@ export default function ClientPortal() {
                  </div>
                  <div>
                     <h3 className="font-display text-4xl md:text-5xl font-black text-black italic uppercase italic leading-[0.85] tracking-tighter">STRATEGIC<br /><span className="not-italic">DOMINANCE.</span></h3>
-                    <p className="text-black/60 text-[11px] mt-6 font-black uppercase tracking-[0.3em] leading-relaxed">Neural infrastructure synchronized across 0 global nodes. Execution potential: 0%.</p>
+                    <p className="text-black/60 text-[11px] mt-6 font-black uppercase tracking-[0.3em] leading-relaxed">Neural infrastructure synchronized across 24 global nodes. Execution potential: 100%.</p>
                  </div>
               </div>
 
@@ -714,7 +724,7 @@ export default function ClientPortal() {
                     <span className="font-display text-[10px] uppercase tracking-[0.5em] text-amber-500 font-black underline underline-offset-8 decoration-amber-500/30">Milestone_03_Unlocked</span>
                   </div>
                   <h3 className="font-display text-2xl md:text-3xl font-black italic tracking-tighter text-white uppercase leading-none mt-2">Efficiency Threshold Achieved.</h3>
-                  <p className="text-zinc-400 text-xs md:text-sm mt-3 font-medium leading-relaxed uppercase tracking-widest">Your operational node has officially crossed the 0% autonomy index. Revenue scaling pipeline is now active.</p>
+                  <p className="text-zinc-400 text-xs md:text-sm mt-3 font-medium leading-relaxed uppercase tracking-widest">Your operational node has officially crossed the 85% autonomy index. Revenue scaling pipeline is now active.</p>
                   
                   <div className="flex gap-4 mt-6">
                     <button 
