@@ -30,34 +30,72 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { getSupabase } from '../lib/supabase';
 import { useAuth } from '../components/AuthContext';
+import { generatePortalInsights, getNeuralAssistantResponse } from '../services/geminiService';
 
-// Helper component for animated numbers with live drift
-const Counter = ({ value, duration = 2, prefix = "", suffix = "", decimals = 1 }: { value: number, duration?: number, prefix?: string, suffix?: string, decimals?: number }) => {
-  const [count, setCount] = useState(0);
+// Helper component for animated numbers that reacts to live shifts
+const Counter = ({ value, prefix = "", suffix = "", decimals = 1 }: { value: number, prefix?: string, suffix?: string, decimals?: number }) => {
+  const [displayValue, setDisplayValue] = useState(value);
 
   useEffect(() => {
-    let frame = 0;
-    const totalFrames = duration * 60;
-    const increment = value / totalFrames;
-    
-    const timer = setInterval(() => {
-      frame++;
-      if (frame <= totalFrames) {
-        setCount(prev => prev + increment);
-      } else {
-        // Drift phase: slow random growth for live feel
-        setCount(prev => prev + (Math.random() * 0.0001 * (value || 1)));
+    let animationFrame: number;
+    const startTime = performance.now();
+    const duration = 1000; // 1 second transition
+    const startValue = displayValue;
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function: easeOutExpo
+      const easedProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      
+      const current = startValue + (value - startValue) * easedProgress;
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
       }
-    }, 16); // ~60fps
+    };
 
-    return () => clearInterval(timer);
-  }, [value, duration]);
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [value]);
 
-  const formatted = count.toLocaleString(undefined, { 
+  const formatted = displayValue.toLocaleString(undefined, { 
     minimumFractionDigits: decimals, 
     maximumFractionDigits: decimals 
   });
   return <span>{prefix}{formatted}{suffix}</span>;
+};
+
+// Hook to simulate live AI-driven metric adjustments
+const useTelemetryEngine = (initialMetrics: any[]) => {
+  const [metrics, setMetrics] = useState(initialMetrics);
+  const [isAdjusting, setIsAdjusting] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAdjusting(true);
+      
+      // Simulate AI "detecting change" and adjusting values
+      setTimeout(() => {
+        setMetrics(prev => prev.map(m => {
+          // Small realistic fluctuations
+          const drift = (Math.random() - 0.4) * (m.value * 0.005); 
+          return {
+            ...m,
+            value: Number((m.value + drift).toFixed(4))
+          };
+        }));
+        setIsAdjusting(false);
+      }, 800); // Adjustment pulse duration
+
+    }, 6000 + Math.random() * 4000); // Every 6-10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return { metrics, isAdjusting };
 };
 
 interface Milestone {
@@ -179,13 +217,98 @@ export default function ClientPortal() {
   const { user, profile, signOut: authSignOut } = useAuth();
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
+  const [dynamicInsights, setDynamicInsights] = useState<AIInsight[]>(aiInsights);
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [assistantMessages, setAssistantMessages] = useState<{ role: 'user' | 'model', text: string, time: string }[]>([
+    { role: 'model', text: 'Neural Link established. I am the Lorven Neural Assistant. How can I optimize your directives today?', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+  ]);
+  const [inputValue, setInputValue] = useState('');
+  const [isAssistantTyping, setIsAssistantTyping] = useState(false);
   const navigate = useNavigate();
 
+  // Initialize live telemetry engine
+  const { metrics, isAdjusting } = useTelemetryEngine([
+    { 
+      label: 'Revenue Impact', 
+      value: 2.4, 
+      prefix: '$', 
+      suffix: 'M', 
+      growth: '+42% YoY', 
+      decimals: 2,
+      icon: DollarSign, 
+      desc: 'Total capital appreciation generated through strategic optimizations.',
+      path: '/strategy'
+    },
+    { 
+      label: 'Time Autonomy', 
+      value: 160.5, 
+      suffix: ' HRS/MO', 
+      growth: 'Efficiency Peak', 
+      decimals: 1,
+      icon: Clock, 
+      desc: 'Operational hours reclaimed via automation and process restructuring.',
+      path: '/telemetry'
+    },
+    { 
+      label: 'Perf. Index', 
+      value: 88.42, 
+      suffix: '%', 
+      growth: 'High Yield', 
+      decimals: 2,
+      icon: Activity, 
+      desc: 'Aggregate performance growth across tracked operational KPIs.',
+      path: '/telemetry'
+    },
+    { 
+      label: 'Active Directives', 
+      value: 12, 
+      growth: '3 In-Queue', 
+      decimals: 0,
+      icon: Briefcase, 
+      desc: 'Current high-priority projects under Lorven execution.',
+      path: '/growth'
+    },
+  ]);
+
   useEffect(() => {
-    // Trigger celebration after a short delay for "demo" effect
-    const timer = setTimeout(() => setShowCelebration(true), 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (isAdjusting) {
+      setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
+    }
+  }, [isAdjusting]);
+
+  useEffect(() => {
+    const fetchInsights = async () => {
+      setIsGeneratingInsights(true);
+      const newInsights = await generatePortalInsights(metrics);
+      if (newInsights && newInsights.length > 0) {
+        setDynamicInsights(newInsights);
+      }
+      setIsGeneratingInsights(false);
+    };
+
+    // Fetch initial and then every 3 adjustments
+    fetchInsights();
+  }, [metrics.length]); // Simple trigger for now
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+
+    const userMessage = { role: 'user' as const, text: inputValue, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    setAssistantMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsAssistantTyping(true);
+
+    try {
+      const history = assistantMessages.map(m => ({ role: m.role, parts: [{ text: m.text }] }));
+      const response = await getNeuralAssistantResponse(inputValue, history);
+      const modelMessage = { role: 'model' as const, text: response || "Analysis timed out. Retrying pipeline connection...", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+      setAssistantMessages(prev => [...prev, modelMessage]);
+    } finally {
+      setIsAssistantTyping(false);
+    }
+  };
 
   const handleLogout = async () => {
     await authSignOut();
@@ -308,54 +431,24 @@ export default function ClientPortal() {
             <section className="flex flex-col gap-8">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-1">
-                  <h2 className="font-display text-xs uppercase tracking-[0.4em] text-zinc-500 font-black">Impact_Metrics.exe</h2>
-                  <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-700 font-medium">Last Updated: {lastUpdated}</span>
+                  <h2 className="font-display text-xs uppercase tracking-[0.4em] text-zinc-500 font-black flex items-center gap-3">
+                    Impact_Metrics.exe
+                    {isAdjusting && (
+                      <motion.span 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-[8px] text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded tracking-widest animate-pulse"
+                      >
+                        AI_DETECTING_CHANGE...
+                      </motion.span>
+                    )}
+                  </h2>
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-700 font-medium">Last Synchronized: {lastUpdated}</span>
                 </div>
                 <div className="h-px flex-1 mx-6 bg-white/5" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {[
-                  { 
-                    label: 'Revenue Impact', 
-                    value: 2.4, 
-                    prefix: '$', 
-                    suffix: 'M', 
-                    growth: '+42% YoY', 
-                    decimals: 2,
-                    icon: DollarSign, 
-                    desc: 'Total capital appreciation generated through strategic optimizations.',
-                    path: '/strategy'
-                  },
-                  { 
-                    label: 'Time Autonomy', 
-                    value: 160.5, 
-                    suffix: ' HRS/MO', 
-                    growth: 'Efficiency Peak', 
-                    decimals: 1,
-                    icon: Clock, 
-                    desc: 'Operational hours reclaimed via automation and process restructuring.',
-                    path: '/telemetry'
-                  },
-                  { 
-                    label: 'Perf. Index', 
-                    value: 88.42, 
-                    suffix: '%', 
-                    growth: 'High Yield', 
-                    decimals: 2,
-                    icon: Activity, 
-                    desc: 'Aggregate performance growth across tracked operational KPIs.',
-                    path: '/telemetry'
-                  },
-                  { 
-                    label: 'Active Directives', 
-                    value: 12, 
-                    growth: '3 In-Queue', 
-                    decimals: 0,
-                    icon: Briefcase, 
-                    desc: 'Current high-priority projects under Lorven execution.',
-                    path: '/growth'
-                  },
-                ].map((metric, i) => (
+                {metrics.map((metric: any, i: number) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 20 }}
@@ -579,7 +672,14 @@ export default function ClientPortal() {
               </div>
 
               <div className="flex flex-col gap-6 relative z-10">
-                {aiInsights.map((insight, i) => (
+                {isGeneratingInsights && (
+                  <div className="flex flex-col gap-4 animate-pulse">
+                    {[1, 2].map(i => (
+                      <div key={i} className="h-32 bg-white/5 rounded-2xl" />
+                    ))}
+                  </div>
+                )}
+                {!isGeneratingInsights && dynamicInsights.map((insight, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 15 }}
@@ -677,15 +777,16 @@ export default function ClientPortal() {
               </div>
 
               <div 
-                onClick={() => navigate('/risk')}
+                onClick={() => setIsAssistantOpen(true)}
                 className="bg-zinc-900/60 border border-white/10 rounded-[2.5rem] p-10 text-center flex flex-col items-center gap-6 group cursor-pointer hover:bg-zinc-800 transition-all duration-700"
               >
-                 <div className="w-16 h-16 bg-black border border-white/5 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-700 shadow-2xl">
-                   <MessageSquare className="w-7 h-7 text-amber-500" />
+                 <div className="w-16 h-16 bg-black border border-white/5 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-700 shadow-2xl relative">
+                   <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                   <Sparkles className="w-7 h-7 text-amber-500" />
                  </div>
                  <div className="flex flex-col gap-2">
-                    <h3 className="font-display text-xs uppercase tracking-[0.5em] font-black text-white italic">Direct Advisory Line</h3>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-[0.3em] leading-relaxed font-bold">Synchronize with your Senior Strategic Partner instantly.</p>
+                    <h3 className="font-display text-xs uppercase tracking-[0.5em] font-black text-white italic">Neural Assistant Alpha</h3>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-[0.3em] leading-relaxed font-bold">Query the Lorven decision engine for real-time strategic counsel.</p>
                  </div>
               </div>
             </div>
@@ -739,6 +840,88 @@ export default function ClientPortal() {
                   </div>
                 </div>
               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Neural Assistant Panel */}
+      <AnimatePresence>
+        {isAssistantOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: 400 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 400 }}
+            className="fixed top-0 right-0 h-full w-full sm:w-[500px] z-[100] bg-black/95 backdrop-blur-3xl border-l border-white/10 shadow-[-50px_0_100px_rgba(0,0,0,0.8)]"
+          >
+            <div className="flex flex-col h-full">
+              <div className="p-8 border-b border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
+                    <Sparkles className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <h2 className="font-display text-lg font-black uppercase tracking-tighter italic">Neural_Assistant</h2>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
+                      <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-zinc-600">Decision Engine: Active</span>
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsAssistantOpen(false)}
+                  className="p-3 hover:bg-white/5 rounded-full transition-colors"
+                >
+                  <XCircle className="w-6 h-6 text-zinc-600 hover:text-white" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-6 scrollbar-hide">
+                {assistantMessages.map((msg, i) => (
+                  <motion.div 
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex flex-col gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                  >
+                    <div className={`max-w-[85%] p-5 rounded-2xl text-[11px] leading-relaxed font-medium uppercase tracking-widest ${
+                      msg.role === 'user' 
+                        ? 'bg-amber-500 text-black rounded-tr-none' 
+                        : 'bg-white/5 border border-white/10 text-zinc-300 rounded-tl-none'
+                    }`}>
+                      {msg.text}
+                    </div>
+                    <span className="text-[8px] uppercase tracking-[0.2em] font-black text-zinc-800">{msg.time}</span>
+                  </motion.div>
+                ))}
+                {isAssistantTyping && (
+                  <div className="flex items-center gap-2 p-5 bg-white/5 border border-white/10 rounded-2xl rounded-tl-none w-fit">
+                    <div className="w-1 h-1 bg-amber-500 rounded-full animate-bounce" />
+                    <div className="w-1 h-1 bg-amber-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-1 h-1 bg-amber-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  </div>
+                )}
+              </div>
+
+              <form onSubmit={handleSendMessage} className="p-8 border-t border-white/5 bg-black/50">
+                <div className="relative group">
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Enter directive query..."
+                    className="w-full bg-zinc-900/50 border border-white/5 rounded-2xl py-4 pl-6 pr-16 text-[10px] uppercase font-black tracking-widest focus:border-amber-500/50 focus:ring-0 transition-all placeholder:text-zinc-700"
+                  />
+                  <button 
+                    type="submit"
+                    disabled={!inputValue.trim() || isAssistantTyping}
+                    className="absolute right-2 top-2 p-3 bg-amber-500 text-black rounded-xl hover:bg-white transition-all disabled:opacity-50"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-[8px] uppercase tracking-[0.3em] font-black text-zinc-800 mt-4 text-center">Encryption: AES-256 Protocol Active</p>
+              </form>
             </div>
           </motion.div>
         )}
