@@ -93,17 +93,11 @@ export function getSupabase(): SupabaseClient {
   return supabaseInstance;
 }
 
-export const signInWithGoogle = async () => {
+export const signInWithEmail = async (email: string, password: string) => {
   const supabase = getSupabase();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: window.location.origin + '/portal',
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-      },
-    }
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
   });
   if (error) throw error;
   return data;
