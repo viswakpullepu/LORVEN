@@ -261,9 +261,9 @@ export default function Home() {
               href="https://viswak-portfolio.vercel.app/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="px-5 py-2.5 rounded-sm border border-white/10 bg-surface/30 hover:bg-surface-container hover:border-primary/30 transition-all duration-300 flex items-center gap-2 group shadow-sm hover:shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+              className="w-full md:w-auto px-5 py-3 md:py-2.5 rounded-sm border border-white/10 bg-surface/30 hover:bg-surface-container hover:border-primary/30 transition-all duration-300 flex items-center justify-center gap-2 group shadow-sm hover:shadow-[0_0_15px_rgba(212,175,55,0.1)]"
             >
-              <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-on-surface-variant/70 group-hover:text-white transition-colors">
+              <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-on-surface-variant/70 group-hover:text-white transition-colors text-center">
                 Made by <span className="text-primary font-semibold">Viswak</span>, COO, Lorven
               </span>
             </a>
