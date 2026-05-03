@@ -255,9 +255,18 @@ export default function Home() {
               </a>
             ))}
           </div>
-          <div className="flex items-center justify-between w-full pt-8 border-t border-white/5">
+          <div className="flex flex-col md:flex-row items-center justify-between w-full pt-8 border-t border-white/5 gap-4 md:gap-0">
             <span className="font-sans text-xs text-on-surface-variant/40">© {new Date().getFullYear()} Lorven. All rights reserved.</span>
-            <div className="w-2 h-2 rounded-full bg-primary/20" />
+            <a 
+              href="https://viswak-portfolio.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="px-5 py-2.5 rounded-sm border border-white/10 bg-surface/30 hover:bg-surface-container hover:border-primary/30 transition-all duration-300 flex items-center gap-2 group shadow-sm hover:shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+            >
+              <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-on-surface-variant/70 group-hover:text-white transition-colors">
+                Made by <span className="text-primary font-semibold">Viswak</span>, COO, Lorven
+              </span>
+            </a>
           </div>
         </div>
       </footer>
