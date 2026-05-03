@@ -147,7 +147,7 @@ export default function Home() {
               {/* Feature Card 1 */}
               <motion.div 
                 variants={{ hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0, transition: { duration: 0.8 } } }}
-                className="bg-surface-container-low border border-white/5 p-10 md:p-12 relative overflow-hidden group hover:border-primary/30 transition-colors duration-500 rounded-sm"
+                className="bg-surface-container-low border border-white/5 p-8 md:p-12 relative overflow-hidden group hover:border-primary/30 transition-colors duration-500 rounded-sm"
               >
                 <div className="flex flex-col h-full gap-8">
                   <div className="w-12 h-12 rounded-full bg-surface border border-white/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500">
@@ -165,7 +165,7 @@ export default function Home() {
               {/* Feature Card 2 */}
               <motion.div 
                 variants={{ hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0, transition: { duration: 0.8 } } }}
-                className="bg-surface-container-low border border-white/5 p-10 md:p-12 relative overflow-hidden group hover:border-primary/30 transition-colors duration-500 rounded-sm"
+                className="bg-surface-container-low border border-white/5 p-8 md:p-12 relative overflow-hidden group hover:border-primary/30 transition-colors duration-500 rounded-sm"
               >
                 <div className="absolute inset-0 z-0">
                    <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/5 blur-[80px] rounded-full group-hover:bg-primary/10 transition-all duration-700" />
@@ -186,7 +186,7 @@ export default function Home() {
               {/* Feature Card 3 */}
               <motion.div 
                 variants={{ hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0, transition: { duration: 0.8 } } }}
-                className="bg-surface-container-low border border-white/5 p-10 md:p-12 relative overflow-hidden group hover:border-primary/30 transition-colors duration-500 rounded-sm"
+                className="bg-surface-container-low border border-white/5 p-8 md:p-12 relative overflow-hidden group hover:border-primary/30 transition-colors duration-500 rounded-sm"
               >
                 <div className="flex flex-col h-full gap-8">
                   <div className="w-12 h-12 rounded-full bg-surface border border-white/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500">
@@ -205,7 +205,7 @@ export default function Home() {
         </section>
 
         {/* Call to Action Section */}
-        <section className="py-24 md:py-40 px-6 md:px-10 bg-background relative overflow-hidden border-t border-white/5">
+        <section className="py-20 md:py-40 px-6 md:px-10 bg-background relative overflow-hidden border-t border-white/5">
           <div className="absolute inset-0 z-0 flex justify-center items-center">
              <div className="w-[800px] h-[800px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
           </div>
@@ -246,9 +246,9 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="w-full border-t border-white/5 bg-surface-container-lowest">
-        <div className="flex flex-col items-center py-16 px-8 max-w-7xl mx-auto gap-10">
+        <div className="flex flex-col items-center py-12 md:py-16 px-6 md:px-8 max-w-7xl mx-auto gap-8 md:gap-10">
           <Logo size={32} className="text-primary/50" />
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 w-full justify-center">
+          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 w-full justify-center">
             {['Terms of Service', 'Privacy Policy', 'Legal Disclaimer', 'Contact Us'].map(link => (
               <a key={link} href="#" className="font-sans text-xs uppercase tracking-widest text-on-surface-variant/60 hover:text-primary transition-colors whitespace-nowrap">
                 {link}
