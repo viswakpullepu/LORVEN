@@ -79,7 +79,7 @@ export default function Home() {
 
       <main className="flex-grow pt-20">
         {/* Hero Section */}
-        <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden px-10 py-20">
+        <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden px-6 md:px-10 py-16 md:py-20">
           <div className="absolute inset-0 z-0">
             <img src={IMAGES.HERO_BG} className="w-full h-full object-cover opacity-20 mix-blend-luminosity" alt="Background" referrerPolicy="no-referrer" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
@@ -97,7 +97,7 @@ export default function Home() {
                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
                 <span className="font-sans text-[9px] uppercase tracking-[0.4em] text-primary">Private Wealth Advisory</span>
               </div>
-              <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.1] text-white">
+              <h1 className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.1] text-white">
                 Mastering the Art of <br />
                 <span className="text-primary italic">Strategic Wealth.</span>
               </h1>
@@ -106,7 +106,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 pt-8">
                 <Link to="/register">
-                  <button className="bg-primary text-on-primary px-12 py-5 rounded-sm font-sans text-xs uppercase tracking-[0.2em] font-semibold hover:bg-white transition-all duration-500 flex items-center justify-center gap-3 group shadow-[0_10px_40px_rgba(212,175,55,0.2)]">
+                  <button className="w-full sm:w-auto bg-primary text-on-primary px-8 sm:px-12 py-4 sm:py-5 rounded-sm font-sans text-xs uppercase tracking-[0.2em] font-semibold hover:bg-white transition-all duration-500 flex items-center justify-center gap-3 group shadow-[0_10px_40px_rgba(212,175,55,0.2)]">
                     Begin Journey
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-500" />
                   </button>
@@ -126,7 +126,7 @@ export default function Home() {
               className="flex flex-col gap-6 items-center text-center max-w-3xl mx-auto"
             >
               <p className="text-primary font-sans text-[10px] md:text-xs uppercase tracking-[0.4em]">Our Expertise</p>
-              <h2 className="font-display text-4xl md:text-6xl font-normal text-white leading-tight">
+              <h2 className="font-display text-3xl sm:text-4xl md:text-6xl font-normal text-white leading-tight">
                 Architects of <span className="italic text-primary">Enduring Legacy</span>
               </h2>
             </motion.div>
@@ -219,7 +219,7 @@ export default function Home() {
               className="flex flex-col gap-6 items-center"
             >
               <Logo size={48} className="text-primary mb-6" />
-              <h2 className="font-display text-4xl md:text-6xl font-normal tracking-tight text-white leading-tight">
+              <h2 className="font-display text-3xl sm:text-4xl md:text-6xl font-normal tracking-tight text-white leading-tight">
                 An Invitation to <br />
                 <span className="italic text-primary">Excellence.</span>
               </h2>
@@ -235,7 +235,7 @@ export default function Home() {
               transition={{ delay: 0.3 }}
             >
                <Link to="/register">
-                 <button className="group relative px-12 md:px-16 py-5 bg-primary text-on-primary font-sans font-semibold uppercase tracking-[0.2em] text-sm overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] rounded-sm">
+                 <button className="w-full sm:w-auto group relative px-8 sm:px-12 md:px-16 py-4 sm:py-5 bg-primary text-on-primary font-sans font-semibold uppercase tracking-[0.2em] text-sm overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] rounded-sm">
                    <span className="relative z-10">Request Consultation</span>
                  </button>
                </Link>
