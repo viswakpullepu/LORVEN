@@ -22,7 +22,7 @@ export default function Logo({ className, size = 48 }: LogoProps) {
         {/* Metallic Hexagon Frame */}
         <path
           d="M50 5L89 27.5V72.5L50 95L11 72.5V27.5L50 5Z"
-          fill="#000000"
+          fill="#0B132B"
           stroke="url(#goldGradient)"
           strokeWidth="6"
           strokeLinejoin="round"
@@ -31,13 +31,13 @@ export default function Logo({ className, size = 48 }: LogoProps) {
         {/* Inner Shadow/Depth for Hexagon */}
         <path
           d="M50 10L84.5 30V70L50 90L15.5 70V30L50 10Z"
-          fill="rgba(0,0,0,0.8)"
+          fill="#050a17"
         />
 
-        {/* Bar Chart (Blue) */}
-        <rect x="35" y="55" width="8" height="15" rx="1" fill="#00A3FF" />
-        <rect x="47" y="48" width="8" height="22" rx="1" fill="#0085FF" />
-        <rect x="59" y="40" width="8" height="30" rx="1" fill="#0066FF" />
+        {/* Bar Chart (Subtle Gold/Navy) */}
+        <rect x="35" y="55" width="8" height="15" rx="1" fill="#1C2541" />
+        <rect x="47" y="48" width="8" height="22" rx="1" fill="#2d3b55" />
+        <rect x="59" y="40" width="8" height="30" rx="1" fill="#7a8b99" />
 
         {/* Rising Arrow (Gold) */}
         <motion.path
